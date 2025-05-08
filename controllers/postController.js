@@ -12,15 +12,31 @@ function index (req,res){
 };
 //show
 function show (req,res){
-    const id = parseInt(req.params.id);
-    const post = connection.find(post => post.id === id);
-    if(!post){
-        return res.status(404).json({
-            error: 'Not Found',
-            message: 'Post non trovato'
+
+    const {id} = req.params;
+
+    const postSql = 'SELECT * FROM posts WHERE id = ?';
+
+    const tagsSql = `
+        SELECT tags.*
+        FROM tags
+        JOIN post_tag ON tags.id = post_tag.tag_id
+        WHERE post_tag.post_id = ? 
+    `;
+
+    connection.query(postSql, [id], (err, postResults) => {
+        if(err) return res.status(500).json({error: 'Ricerca Database fallita'});
+        if(postResults.length === 0) return res.status(404).json({error: 'Post non trovato'})
+
+        const post = postResults[0];
+
+        connection.query(tagsSql, [id], (err, tagsResults) => {
+            if(err) return res.status(500).json({error: 'Ricerca Database fallita'});
+
+            post.tags = tagsResults;
+            res.json(post);
         });
-    };
-    res.json(post);
+    });
 };
 //store
 function store (req,res){
