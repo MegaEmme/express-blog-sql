@@ -1,4 +1,4 @@
-const posts = require('../data/posts');
+const posts = require('../data/db');
 //CRUD
 //index
 function index (req,res){
