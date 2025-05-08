@@ -1,19 +1,19 @@
-const posts = require('../data/db');
+const connection = require('../data/db');
 //CRUD
 //index
 function index (req,res){
-    // variabile inesistente per prova middleware errori
-    // provaerrore(); 
-    let filteredPosts = posts;
-    if(req.query.tags){
-        filteredPosts = posts.filter(post => post.tags.includes(req.query.tags));
-    }
-    res.json(filteredPosts);
+
+    const sql = 'SELECT * FROM posts'
+
+    connection.query(sql, (err, results) => {
+        if(err) return res.status(500).json({ error: 'Post non tovato'});
+        res.json(results);
+    })
 };
 //show
 function show (req,res){
     const id = parseInt(req.params.id);
-    const post = posts.find(post => post.id === id);
+    const post = connection.find(post => post.id === id);
     if(!post){
         return res.status(404).json({
             error: 'Not Found',
@@ -24,7 +24,7 @@ function show (req,res){
 };
 //store
 function store (req,res){
-    const newId = posts[posts.length-1].id +1;
+    const newId = connection[connection.length-1].id +1;
     const newPost = {
         id: newId,
         title: req.body.title,
@@ -33,14 +33,14 @@ function store (req,res){
         tags: req.body.tags
     };
     console.log(newPost);
-    posts.push(newPost);
-    console.log(posts);
+    connection.push(newPost);
+    console.log(connection);
     res.status(201).json(newPost);
 };
 //update
 function update (req,res){
     const id = parseInt(req.params.id);
-    const post = posts.find(post=>post.id===id);
+    const post = connection.find(post=>post.id===id);
     if(!post){
         res.status(404);
         return res.json({
@@ -62,7 +62,7 @@ function update (req,res){
 //modify
 function modify (req,res){
     const id = parseInt(req.params.id);
-    const post = posts.find(post=>post.id===id);
+    const post = connection.find(post=>post.id===id);
     if(!post){
         res.status(404);
         return res.json({
@@ -92,7 +92,7 @@ function modify (req,res){
 //destroy
 function destroy (req,res){
     const id = parseInt(req.params.id);
-    const post = posts.find(post => post.id === id);
+    const post = connection.find(post => post.id === id);
     if(!post){
         res.status(404);
         return res.json({
@@ -101,8 +101,8 @@ function destroy (req,res){
             message: 'Post non trovato'
         });
     };
-    posts.splice(posts.indexOf(post), 1);
-    console.log(posts);
+    connection.splice(connection.indexOf(post), 1);
+    console.log(connection);
     res.sendStatus(204);
 };
 
